@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Search Book Records</title>
+
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f4f6f8;
+                margin: 0;
+                padding: 30px;
+            }
+
+            .container {
+                max-width: 600px;
+                margin: auto;
+                background-color: white;
+                padding: 25px;
+                border-radius: 10px;
+            }
+
+            h1 {
+                text-align: center;
+                color: #23476b;
+            }
+
+            select {
+                width: 100%;
+                padding: 10px;
+                margin: 10px 0 20px;
+            }
+
+            #bookDetails {
+                background-color: #eef4f8;
+                padding: 15px;
+                border-radius: 8px;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="container">
+            <h1>Book Records</h1>
+
+            <label for="bookSelect">Select a book title:</label>
+
+            <select id="bookSelect">
+                <option value="">-- Select a book --</option>
+            </select>
+
+            <div id="bookDetails">
+                Please select a book to view its details.
+            </div>
+        </div>
+
+        <script>
+            const bookSelect = document.getElementById("bookSelect");
+            const bookDetails = document.getElementById("bookDetails");
+
+            let books = [];
+
+            //retrieve JSON data from GitHub
+            fetch("https://raw.githubusercontent.com/nurhusnaamira/lab06-JSON/refs/heads/main/books.json").then(response => {
+                if(!response.ok) {
+                    throw new Error("Failed to load book records.");
+                }
+                return response.json();
+            })
+            .then(data => {
+                books = data.books;
+
+                //add book titles to the dropdown
+                books.forEach(books => {
+                    const option = document.createElement("option");
+                    option.value = books.title;
+                    option.textContent = books.title;
+                    bookSelect.appendChild(option);
+                });
+
+            })
+            .catch(error => {
+                bookDetails.textContent ="Unable to load book records. Please check the GitHub URL.";
+                console.error(error);
+            });
+
+            //seacrh for the selected book
+            bookSelect.addEventListener("change", function () {
+                const selectedTitle = bookSelect.value;
+
+            if(selectedTitle === "") {
+                bookDetails.textContent = "Please select a book to view its details.";
+                return;
+            }
+
+            const foundBook = books.find(
+                books => books.title === selectedTitle
+            );
+
+            //display the book details
+            if(foundBook) {
+                bookDetails.innerHTML = `
+                <h2>${foundBook.title}</h2>
+                <p><strong>Author:</strong> ${foundBook.author}</p>
+                <p><strong>Publication Year:</strong> ${foundBook.publicationYear}</p>
+                <p><strong>Genres:</strong> ${foundBook.genres.join(", ")}</p>
+                `;
+            } else{
+                bookDetails.textContent = "book not found.";
+            }
+
+            });
+        </script>
+    </body>
+</html>
